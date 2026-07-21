@@ -1,0 +1,24 @@
+{
+  "name": "chromex",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @chromex/extension build && pnpm --filter @chromex/mcp build && pnpm --filter @chromex/plugin build",
+    "clean": "pnpm -r clean",
+    "install:local": "pnpm --filter @chromex/plugin install:local",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "pnpm --filter @chromex/mcp test",
+    "typecheck": "pnpm -r typecheck",
+    "versions": "node scripts/check-versions.mjs",
+    "verify": "pnpm lint && pnpm versions && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:tooling"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

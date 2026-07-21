@@ -1,0 +1,16 @@
+{
+  "name": "@chromex/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "clean": "node scripts/clean.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tooling",
+    "esbuild": "catalog:tooling",
+    "typescript": "catalog:tooling"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chromex Development"
+  short_description: "Build and maintain the Chromex bridge"
+  default_prompt: "Use $chromex-development to modify and verify the Chromex workspace."

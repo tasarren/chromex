@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Codex Chromium Bridge",
+  "version": "0.1.0",
+  "description": "Locally connects Chromium tabs to a personal Codex MCP plugin.",
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArALgXbDD1D94Pd+21zaF+xYPWt7AHII7dtkmvItuI5KyNzHRi7Sh+a1yjrWWiBklxdCRpJOh1prl+LP9BWMoPYBIcccRT86ADLxnNpVPSrHukhCba7dp2mBPJ4/HPkAiApouM0HffIal/pbR8abVAFmxtyvHCzDXSQSWf3jAUjoTjr7UQWxZfmJiZabkSzUqZw+hN1itU/DV0O6nd4GMC/M3JmFAEusRuzmAUoeSpcUpVTzoGgA4DZ7CFQ1Gpzbz94mGzWZKRkur2OK5Ro8mj32PYOKb9ZorOUEqCP5mWdlA9AhuNOCEj/B6y+tcLs9ayiY+cxYh5EfA1AY/ZYRtGQIDAQAB",
+  "permissions": ["alarms", "debugger", "nativeMessaging", "storage", "tabs"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Codex Chromium Bridge"
+  }
+}

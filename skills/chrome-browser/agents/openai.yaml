@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chromium Browser"
+  short_description: "Safely control local Chromium tabs"
+  default_prompt: "Use $chrome-browser to inspect and interact with my Chromium tab."

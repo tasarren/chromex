@@ -1,0 +1,26 @@
+{
+  "name": "chrome-browser-bridge",
+  "version": "0.1.0",
+  "description": "Control an existing local Chromium profile through an audited native bridge.",
+  "author": {
+    "name": "Local"
+  },
+  "license": "UNLICENSED",
+  "keywords": ["browser", "chromium", "mcp", "linux"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Chromium Browser Bridge",
+    "shortDescription": "Control your local Chromium tabs",
+    "longDescription": "A local Linux bridge that gives Codex controlled access to existing Chromium tabs through native messaging and MCP.",
+    "developerName": "Local",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Inspect the active Chromium tab.",
+      "Use Chromium to verify this web flow.",
+      "Open a tab and interact with the page."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

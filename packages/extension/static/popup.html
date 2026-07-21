@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex Chromium Bridge</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Codex Bridge</h1>
+      <p id="status" class="status">Checking…</p>
+      <dl>
+        <div><dt>Native host</dt><dd id="native-host">—</dd></div>
+        <div><dt>Controlled tabs</dt><dd id="lease-count">0</dd></div>
+      </dl>
+      <button id="disconnect" type="button">Release all tabs</button>
+      <p id="message" class="message" aria-live="polite"></p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

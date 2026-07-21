@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "chrome-browser-bridge": {
+      "command": "node",
+      "args": ["./dist/mcp-server.mjs"],
+      "cwd": ".",
+      "default_tools_approval_mode": "writes",
+      "startup_timeout_sec": 10,
+      "tool_timeout_sec": 60
+    }
+  }
+}

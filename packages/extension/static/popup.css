@@ -1,0 +1,60 @@
+:root {
+  color-scheme: light dark;
+  font:
+    13px / 1.4 system-ui,
+    sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+}
+
+main {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.status {
+  border-radius: 6px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  padding: 8px;
+}
+
+.connected {
+  background: color-mix(in srgb, #16a34a 18%, transparent);
+}
+.disconnected {
+  background: color-mix(in srgb, #dc2626 18%, transparent);
+}
+
+dl {
+  margin: 0 0 12px;
+}
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+dt {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+}
+dd {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  padding: 7px 10px;
+  width: 100%;
+}
+
+.message {
+  margin: 8px 0 0;
+  min-height: 1.4em;
+}

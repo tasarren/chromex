@@ -1,0 +1,22 @@
+{
+  "name": "@chromex/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "clean": "node scripts/clean.mjs",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:runtime",
+    "zod": "catalog:runtime"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tooling",
+    "esbuild": "catalog:tooling",
+    "tsx": "catalog:tooling",
+    "typescript": "catalog:tooling"
+  }
+}
