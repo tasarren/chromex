@@ -1,0 +1,10 @@
+{
+  "mcp": {
+    "servers": {
+      "chrome-browser-bridge": {
+        "type": "local",
+        "command": ["/usr/bin/node", "/home/haze/plugins/chrome-browser-bridge/dist/mcp-server.mjs"]
+      }
+    }
+  }
+}

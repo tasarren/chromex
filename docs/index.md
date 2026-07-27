@@ -1,6 +1,6 @@
 # Chromex Documentation
 
-Chromex connects Codex to a user's existing Chromium session on Linux without depending on the ChatGPT desktop application.
+Chromex defaults to shared Managed Chromium per project/profile, with live tab handoff between agents. Observe access to the user's browser requires a per-tab extension-popup grant. No ChatGPT desktop application is required.
 
 ## Guides
 

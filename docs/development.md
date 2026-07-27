@@ -6,6 +6,7 @@
 - pnpm 10.33 or compatible
 - Chromium with unpacked-extension support
 - Codex CLI with personal plugins enabled
+- Claude Code and OpenCode CLIs when their global MCP registrations should be installed
 
 ## Workspace Commands
 
@@ -16,11 +17,20 @@ Run commands from `chromex`.
 | `pnpm install` | Install all workspace dependencies from named catalogs. |
 | `pnpm lint:fix` | Format and apply safe lint fixes. |
 | `pnpm typecheck` | Type-check all three packages. |
-| `pnpm test` | Run MCP framing and origin-policy tests. |
+| `pnpm test` | Run MCP/runtime tests and isolated local-installer tests. |
 | `pnpm build` | Build extension, MCP runtime, then assembled plugin. |
 | `pnpm verify` | Run lint, version consistency, types, tests, and build. |
 | `pnpm clean` | Remove generated package outputs. |
-| `pnpm install:local` | Install the assembled plugin and native-host registration. |
+| `pnpm install:local` | Install the bridge/plugin and configure detected agent clients. |
+| `pnpm install:local -- --no-open` | Perform the same install without opening `chrome://extensions`. |
+
+After building, verify real sharing from a graphical session:
+
+```bash
+pnpm --filter @chromex/mcp exec env CHROMEX_LIVE_TEST=1 node --import tsx --test test/shared-browser-live.test.ts
+```
+
+This opt-in test exercises persistent and temporary Chromium through independent MCP clients. It verifies refused-navigation diagnostics, native-host reconnect, lease exclusion, live DOM handoff, state after all clients disconnect, and browser/service recovery. It cleans up its browsers and profiles. Normal `pnpm test` skips these desktop-dependent checks.
 
 ## Dependency Versions
 

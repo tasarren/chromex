@@ -1,14 +1,23 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createConnection, type Socket } from "node:net";
+import { basename } from "node:path";
 import {
   BrokerHelloResultSchema,
   BrokerNotificationSchema,
   BrokerResponseSchema,
   errorMessage,
+  PROTOCOL_VERSION,
 } from "../protocol/schema.js";
 import { encodeFrame, FrameDecoder } from "../shared/framing.js";
 import { type BridgeConfig, bridgeConfigPath } from "../shared/paths.js";
+
+/** A name the user can recognize in the extension popup, e.g. "chromex (pid 4821)". */
+function clientLabel(): string {
+  const override = process.env.CHROMEX_LABEL?.trim();
+  if (override) return override.slice(0, 120);
+  return `${basename(process.cwd())} (pid ${process.pid})`;
+}
 
 type Pending = {
   reject(cause: Error): void;
@@ -16,14 +25,25 @@ type Pending = {
   timer: ReturnType<typeof setTimeout>;
 };
 
+type BrokerClientOptions = {
+  configPath?: string | undefined;
+  mode?: "managed" | "observe" | undefined;
+};
+
 export class BrokerClient {
   readonly clientId = randomUUID();
-  private config: BridgeConfig | null = null;
   private connected: Promise<void> | null = null;
-  private decoder = new FrameDecoder();
+  private generation = 0;
+  private notificationHandler: ((method: string, params: unknown) => void) | null = null;
   private pending = new Map<string, Pending>();
   private sequence = 1;
   private socket: Socket | null = null;
+
+  constructor(private readonly options: BrokerClientOptions = {}) {}
+
+  onNotification(handler: (method: string, params: unknown) => void): void {
+    this.notificationHandler = handler;
+  }
 
   async request<T = unknown>(method: string, params: unknown = {}, timeoutMs = 30_000): Promise<T> {
     await this.connect();
@@ -45,6 +65,7 @@ export class BrokerClient {
   }
 
   async close(): Promise<void> {
+    this.generation += 1;
     const socket = this.socket;
     this.socket = null;
     this.connected = null;
@@ -53,48 +74,85 @@ export class BrokerClient {
   }
 
   private async connect(): Promise<void> {
-    if (this.socket && !this.socket.destroyed) return;
     if (this.connected) return await this.connected;
-    this.connected = this.open();
+    if (this.socket && !this.socket.destroyed) return;
+    const connected = this.open();
+    this.connected = connected;
     try {
-      await this.connected;
+      await connected;
     } finally {
-      this.connected = null;
+      if (this.connected === connected) this.connected = null;
     }
   }
 
   private async open(): Promise<void> {
-    this.config = JSON.parse(await readFile(bridgeConfigPath(), "utf8")) as BridgeConfig;
-    this.decoder = new FrameDecoder();
-    const socket = createConnection(this.config.socketPath);
+    const generation = this.generation;
+    const config = JSON.parse(
+      await readFile(this.options.configPath ?? bridgeConfigPath(), "utf8"),
+    ) as BridgeConfig;
+    if (generation !== this.generation) throw new Error("Chromium bridge client closed");
+    const decoder = new FrameDecoder();
+    const socket = createConnection(config.socketPath);
     this.socket = socket;
-    socket.on("data", (chunk) => this.onData(Buffer.from(chunk)));
-    socket.on("error", (cause) => this.disconnect(new Error(errorMessage(cause))));
-    socket.on("close", () => this.disconnect(new Error("Chromium bridge disconnected")));
-    await new Promise<void>((resolve, reject) => {
-      socket.once("connect", resolve);
-      socket.once("error", reject);
-    });
-    socket.write(encodeFrame({ kind: "hello", clientId: this.clientId, token: this.config.token }));
+    socket.on("data", (chunk) => this.onData(socket, decoder, Buffer.from(chunk)));
+    socket.on("error", (cause) => this.disconnect(socket, new Error(errorMessage(cause))));
+    socket.on("close", () => this.disconnect(socket, new Error("Chromium bridge disconnected")));
     await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(
-        () => reject(new Error("Chromium bridge authentication timed out")),
+        () => finish(new Error("Chromium bridge authentication timed out")),
         5_000,
       );
+      const onClose = () => finish(new Error("Chromium bridge disconnected during authentication"));
+      const onError = (cause: Error) => finish(cause);
+      const finish = (cause?: Error) => {
+        clearTimeout(timer);
+        socket.off("close", onClose);
+        socket.off("error", onError);
+        if (cause) {
+          this.disconnect(socket, cause);
+          reject(cause);
+        } else resolve();
+      };
+      socket.once("close", onClose);
+      socket.once("error", onError);
       const onHello = (value: unknown) => {
         const hello = BrokerHelloResultSchema.safeParse(value);
         if (!hello.success) return false;
-        clearTimeout(timer);
-        hello.data.ok ? resolve() : reject(new Error(hello.data.error ?? "Authentication failed"));
+        if (!hello.data.ok) {
+          finish(new Error(hello.data.error ?? "Authentication failed"));
+          return true;
+        }
+        const extensionProtocol = hello.data.extension?.protocolVersion;
+        if (extensionProtocol !== undefined && extensionProtocol !== PROTOCOL_VERSION) {
+          finish(
+            new Error(
+              `Chromex protocol mismatch: MCP expects ${PROTOCOL_VERSION}, extension reports ${extensionProtocol}. Rebuild and reload the extension.`,
+            ),
+          );
+          return true;
+        }
+        finish();
         return true;
       };
       (socket as Socket & { __hello?: (value: unknown) => boolean }).__hello = onHello;
+      socket.once("connect", () => {
+        socket.write(
+          encodeFrame({
+            kind: "hello",
+            clientId: this.clientId,
+            label: clientLabel(),
+            ...(this.options.mode === undefined ? {} : { mode: this.options.mode }),
+            token: config.token,
+          }),
+        );
+      });
     });
   }
 
-  private onData(chunk: Buffer): void {
+  private onData(connection: Socket, decoder: FrameDecoder, chunk: Buffer): void {
+    if (this.socket !== connection) return;
     try {
-      for (const value of this.decoder.push(chunk)) {
+      for (const value of decoder.push(chunk)) {
         const socket = this.socket as (Socket & { __hello?: (value: unknown) => boolean }) | null;
         if (socket?.__hello?.(value)) {
           delete socket.__hello;
@@ -111,15 +169,16 @@ export class BrokerClient {
             : match.resolve(response.data.result);
           continue;
         }
-        BrokerNotificationSchema.parse(value);
+        const notification = BrokerNotificationSchema.parse(value);
+        this.notificationHandler?.(notification.method, notification.params);
       }
     } catch (cause) {
-      this.disconnect(new Error(`Invalid bridge response: ${errorMessage(cause)}`));
+      this.disconnect(connection, new Error(`Invalid bridge response: ${errorMessage(cause)}`));
     }
   }
 
-  private disconnect(cause: Error): void {
-    const socket = this.socket;
+  private disconnect(socket: Socket, cause: Error): void {
+    if (this.socket !== socket) return;
     this.socket = null;
     socket?.destroy();
     this.rejectAll(cause);

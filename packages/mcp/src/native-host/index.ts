@@ -38,6 +38,7 @@ let nextHostRequestId = 1;
 const clients = new Set<ClientState>();
 const pending = new Map<string, PendingRequest>();
 const chromeDecoder = new FrameDecoder();
+let shuttingDown = false;
 
 await ensureSocketIsAvailable(config.socketPath);
 
@@ -78,6 +79,10 @@ process.stdin.on("data", (chunk: Buffer) => {
 });
 process.stdin.on("end", () => void shutdown(0));
 process.stdin.on("error", (cause) => fail(`Chrome stdin error: ${errorMessage(cause)}`));
+process.stdout.on("error", (cause: NodeJS.ErrnoException) => {
+  if (cause.code !== "EPIPE") log(`Chrome stdout error: ${errorMessage(cause)}`);
+  void shutdown(cause.code === "EPIPE" ? 0 : 1);
+});
 process.on("SIGINT", () => void shutdown(0));
 process.on("SIGTERM", () => void shutdown(0));
 
@@ -119,6 +124,17 @@ async function handleClientFrame(state: ClientState, value: unknown): Promise<vo
     state.authenticated = true;
     state.clientId = hello.data.clientId;
     sendClient(state, { kind: "hello", ok: true, extension: extensionInfo });
+    // Tell the extension who this client is, so the popup can name it.
+    writeChrome({
+      jsonrpc: "2.0",
+      id: `hello-${nextHostRequestId++}`,
+      method: "client.hello",
+      params: {
+        clientId: hello.data.clientId,
+        label: hello.data.label,
+        mode: config.managed === true ? "managed" : "observe",
+      },
+    });
     return;
   }
 
@@ -135,6 +151,25 @@ async function handleClientFrame(state: ClientState, value: unknown): Promise<vo
   }
 
   const hostRequestId = `host-${nextHostRequestId++}`;
+  if (
+    ![
+      "bridge.status",
+      "client.status",
+      "window.ensure",
+      "tabs.list",
+      "tabs.create",
+      "tabs.claim",
+      "tabs.park",
+      "tabs.release",
+      "tabs.close",
+      "cdp.attach",
+      "cdp.detach",
+      "cdp.command",
+    ].includes(request.method)
+  ) {
+    sendClient(state, { kind: "response", id: request.id, error: "Unsupported broker method" });
+    return;
+  }
   const params =
     request.params && typeof request.params === "object" && !Array.isArray(request.params)
       ? { ...(request.params as Record<string, unknown>), clientId: state.clientId }
@@ -167,6 +202,12 @@ function handleChromeFrame(value: unknown): void {
 
 function handleExtensionRequest(request: RpcRequest): void {
   if (request.method === "bridge.hello") {
+    writeChrome({
+      jsonrpc: "2.0",
+      id: `configure-${nextHostRequestId++}`,
+      method: "bridge.configure",
+      params: { managed: config.managed === true },
+    });
     extensionInfo = ExtensionInfoSchema.parse(request.params);
     log(
       `Extension connected: ${extensionInfo.extensionId} v${extensionInfo.extensionVersion} protocol ${extensionInfo.protocolVersion}`,
@@ -208,10 +249,13 @@ function broadcast(value: unknown, targetClient: string | null = null): void {
 }
 
 function writeChrome(value: unknown): void {
+  if (shuttingDown || process.stdout.destroyed) return;
   process.stdout.write(encodeFrame(value, CHROME_MAX_OUTBOUND_BYTES));
 }
 
 async function shutdown(code: number): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
   for (const client of clients) client.socket.destroy();
   await new Promise<void>((resolve) => server.close(() => resolve()));
   await rm(config.socketPath, { force: true });

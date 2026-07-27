@@ -7,6 +7,7 @@
     "build": "node scripts/build.mjs",
     "clean": "node scripts/clean.mjs",
     "install:local": "node scripts/install.mjs",
-    "typecheck": "node --check scripts/build.mjs && node --check scripts/install.mjs"
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "node --check scripts/build.mjs && node --check scripts/install.mjs && node --check test/install.test.mjs"
   }
 }

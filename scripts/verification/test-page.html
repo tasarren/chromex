@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chromex verification</title>
+    <style>
+      .spacer { height: 1400px; }
+      #hovertarget:hover + #revealed { display: block; }
+      #revealed { display: none; }
+    </style>
+  </head>
+  <body>
+    <h1>Chromex verification</h1>
+    <div><div><div>
+      <form id="form" onsubmit="event.preventDefault(); document.getElementById('result').textContent = 'submitted:' + document.getElementById('field').value;">
+        <input id="field" name="field" aria-label="Email" value="preset" />
+      </form>
+    </div></div></div>
+    <p id="result">not submitted</p>
+    <select id="picker" aria-label="Pick one">
+      <option value="a">Alpha</option>
+      <option value="b">Beta</option>
+    </select>
+    <p id="picked">picked: none</p>
+    <button id="hovertarget">Hover me</button>
+    <span id="revealed">revealed by hover</span>
+    <div class="spacer"></div>
+    <button id="deep" onclick="this.textContent = 'CLICKED BELOW FOLD'">Below the fold</button>
+    <script>
+      document.getElementById("picker").addEventListener("change", (e) => {
+        document.getElementById("picked").textContent = "picked: " + e.target.value;
+      });
+      console.log("hello from the page", { a: 1 });
+      console.warn("a warning");
+      fetch("/missing-endpoint");
+      setTimeout(() => { throw new Error("deliberate test exception"); }, 50);
+    </script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 3;
 export const NATIVE_HOST_NAME = "io.codex.chrome_bridge";
 export const EXTENSION_ID = "enbcklgjkjddndpkedgfhoeagcbogfdb";
 export const EXTENSION_ORIGIN = `chrome-extension://${EXTENSION_ID}/`;
@@ -39,6 +39,7 @@ export const ExtensionInfoSchema = z.object({
 export type ExtensionInfo = z.infer<typeof ExtensionInfoSchema>;
 
 export const TabInfoSchema = z.object({
+  controlled: z.boolean().optional(),
   active: z.boolean(),
   id: z.number().int().nonnegative(),
   title: z.string(),
@@ -50,6 +51,9 @@ export type TabInfo = z.infer<typeof TabInfoSchema>;
 export const BrokerHelloSchema = z.object({
   kind: z.literal("hello"),
   clientId: z.string().min(1),
+  // Optional so an older MCP server still authenticates; shown only in the extension popup.
+  label: z.string().max(120).optional(),
+  mode: z.enum(["managed", "observe"]).optional(),
   token: z.string().min(32),
 });
 

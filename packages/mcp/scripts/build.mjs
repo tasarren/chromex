@@ -20,6 +20,11 @@ const common = {
 await Promise.all([
   build({
     ...common,
+    entryPoints: [resolve(root, "src/mcp/managed-service.ts")],
+    outfile: resolve(out, "managed-service.mjs"),
+  }),
+  build({
+    ...common,
     banner: { js: "#!/usr/bin/env node" },
     entryPoints: [resolve(root, "src/native-host/index.ts")],
     outfile: resolve(out, "native-host.mjs"),

@@ -39,13 +39,17 @@ Read the relevant document before changing a boundary:
 After a successful build:
 
 1. Run `pnpm install:local` from the workspace root.
-2. Run the Codex plugin-creator cachebuster helper against `~/plugins/chrome-browser-bridge`.
-3. Read the personal marketplace name with the plugin-creator helper.
-4. Reinstall with `codex plugin add chrome-browser-bridge@<marketplace>`.
-5. Ask the user to start a new Codex thread.
+2. Confirm that Codex, Claude Code, and OpenCode were configured or explicitly reported as missing.
+3. Ask the user to start a new Codex thread.
 
-Do not edit the personal marketplace JSON or Codex configuration by hand.
+Run the installer from the graphical Linux session intended for Managed mode. It refreshes the
+owner-only allowlisted display environment stored beside the installed MCP runtime.
+
+The installer performs the Codex plugin-creator cachebuster and reinstall flow. Do not repeat those
+steps or edit the personal marketplace JSON or Codex configuration by hand.
 
 ## Extension Handoff
 
-If the unpacked output path or extension manifest changes, tell the user to load or reload `packages/extension/dist` from `chrome://extensions`. Loading an unpacked extension is the only required GUI step.
+Tell the user to load or reload `~/plugins/chrome-browser-bridge/dist/extension` from
+`chrome://extensions`. The installer opens that page in interactive graphical sessions; loading the
+unpacked directory is the only required GUI step.

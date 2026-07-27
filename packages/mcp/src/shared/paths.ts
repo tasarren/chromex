@@ -2,6 +2,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 export type BridgeConfig = {
+  managed?: boolean;
   extensionOrigin: string;
   socketPath: string;
   token: string;

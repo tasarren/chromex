@@ -9,7 +9,7 @@
     "install:local": "pnpm --filter @chromex/plugin install:local",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "pnpm --filter @chromex/mcp test",
+    "test": "pnpm --filter @chromex/mcp --filter @chromex/plugin test",
     "typecheck": "pnpm -r typecheck",
     "versions": "node scripts/check-versions.mjs",
     "verify": "pnpm lint && pnpm versions && pnpm typecheck && pnpm test && pnpm build"

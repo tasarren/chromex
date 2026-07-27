@@ -7,7 +7,7 @@
 
 body {
   margin: 0;
-  min-width: 280px;
+  min-width: 360px;
 }
 
 main {
@@ -48,8 +48,68 @@ dd {
   margin: 0;
 }
 
+h2 {
+  border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin: 14px 0 6px;
+  padding-top: 10px;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.clients li {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0;
+}
+.client-name {
+  font-weight: 600;
+}
+.client-tab {
+  color: color-mix(in srgb, currentColor 65%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.events {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.events li {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 4.5em 7em 1fr;
+  padding: 2px 0;
+}
+.event-time,
+.event-who {
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.event-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  font-style: italic;
+}
+
 button {
   cursor: pointer;
+  margin-top: 12px;
   padding: 7px 10px;
   width: 100%;
 }

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = resolve(root, "dist/chrome-browser-bridge");
+const extensionOut = resolve(root, "../extension/dist");
 const mcpOut = resolve(root, "../mcp/dist");
 await rm(resolve(root, "dist"), { force: true, recursive: true });
 await mkdir(resolve(out, "dist"), { recursive: true });
@@ -12,10 +13,13 @@ await cp(resolve(root, "../../skills/chrome-browser"), resolve(out, "skills/chro
   recursive: true,
 });
 await Promise.all([
+  cp(resolve(mcpOut, "managed-service.mjs"), resolve(out, "dist/managed-service.mjs")),
+  cp(resolve(mcpOut, "managed-service.mjs.map"), resolve(out, "dist/managed-service.mjs.map")),
   cp(resolve(mcpOut, "mcp-server.mjs"), resolve(out, "dist/mcp-server.mjs")),
   cp(resolve(mcpOut, "mcp-server.mjs.map"), resolve(out, "dist/mcp-server.mjs.map")),
   cp(resolve(mcpOut, "native-host.mjs"), resolve(out, "dist/native-host.mjs")),
   cp(resolve(mcpOut, "native-host.mjs.map"), resolve(out, "dist/native-host.mjs.map")),
+  cp(extensionOut, resolve(out, "dist/extension"), { recursive: true }),
 ]);
 const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
 await writeFile(

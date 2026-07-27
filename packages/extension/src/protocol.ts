@@ -1,4 +1,4 @@
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 3;
 export const NATIVE_HOST_NAME = "io.codex.chrome_bridge";
 export const EXTENSION_ID = "enbcklgjkjddndpkedgfhoeagcbogfdb";
 
