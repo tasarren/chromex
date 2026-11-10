@@ -24,8 +24,9 @@ installation.
 npx @tasarren/chromex setup [--browsers all|none|<name,...>] [--scope project|global] [--skills none] [--no-open]
 ```
 
-The package is not published yet (the project is pre-1.0).
-Until the first release, build from source and run the same command through pnpm:
+The package is on npm as `@tasarren/chromex` (the project is pre-1.0).
+
+To run a checkout instead (from source), build it and run the same command through pnpm:
 
 ```bash
 git clone https://github.com/tasarren/chromex.git
