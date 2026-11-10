@@ -279,12 +279,21 @@ export class BrowserController {
       .object({ errorText: z.string().optional() })
       .parse(await this.cdp("Page.navigate", { url }))
     if (result.errorText) throw new Error(`Navigation failed for ${url}: ${result.errorText}`)
-    // A web page, including a data: page, returns to the extension debugger before reading.
-    // Internal pages stay on the pipe, so the load checks below must not wait for an attach.
-    if (!internal && this.pipeTarget !== null) await this.attach(tabId)
-    // The old document can still report readyState 'complete', so wait for the URL to turn over
-    // before trusting the load state.
-    if (url !== previous) await this.waitForUrlChange(previous, 30_000)
+    if (!internal && this.pipeTarget !== null) {
+      // The pipe loses the old internal document on commit, so read the browser tab instead.
+      await this.waitForTabUrl(
+        tabId,
+        (current) => current !== previous && !INTERNAL_URL.test(current),
+        30_000,
+      )
+      // A web page, including a data: page, returns to the extension debugger only after the new
+      // document commits. Attaching while the internal page unloads races Chrome's detach.
+      await this.attach(tabId)
+    } else if (url !== previous) {
+      // The old document can still report readyState 'complete', so wait for the URL to turn over
+      // before trusting the load state.
+      await this.waitForUrlChange(previous, 30_000)
+    }
     await this.wait({ state: "load", timeoutMs: 30_000 })
     const current = await this.currentUrl()
     this.refs.clear()
@@ -802,6 +811,19 @@ export class BrowserController {
       }
     } catch {
       throw new Error(`Element ${ref} is no longer on the page; take a new snapshot.`)
+    }
+  }
+  private async waitForTabUrl(
+    tabId: number,
+    accept: (url: string) => boolean,
+    timeoutMs: number,
+  ): Promise<void> {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      const tabs = z.array(TabInfoSchema).parse(await this.broker.request("tabs.list"))
+      const url = tabs.find((tab) => tab.id === tabId)?.url
+      if (url !== undefined && accept(url)) return
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
   }
   private async waitForUrlChange(previous: string, timeoutMs: number): Promise<void> {
