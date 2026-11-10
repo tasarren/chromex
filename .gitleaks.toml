@@ -13,4 +13,5 @@ targetRules = ["generic-api-key"]
 condition = "AND"
 regexTarget = "secret"
 regexes = ['''^MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArALgXbDD1D94Pd\+21zaF\+xYPWt7AHII7dtkmvItuI5KyNzHRi7Sh\+a1yjrWWiBklxdCRpJOh1prl\+LP9BWMoPYBIcccRT86ADLxnNpVPSrHukhCba7dp2mBPJ4/HPkAiApouM0HffIal/pbR8abVAFmxtyvHCzDXSQSWf3jAUjoTjr7UQWxZfmJiZabkSzUqZw\+hN1itU/DV0O6nd4GMC/M3JmFAEusRuzmAUoeSpcUpVTzoGgA4DZ7CFQ1Gpzbz94mGzWZKRkur2OK5Ro8mj32PYOKb9ZorOUEqCP5mWdlA9AhuNOCEj/B6y\+tcLs9ayiY\+cxYh5EfA1AY/ZYRtGQIDAQAB$''']
-paths = ['''(^|/)packages/extension/static/manifest\.json$''']
+# The deleted v0.1.0 install test held the same key; it stays in history on `main`.
+paths = ['''(^|/)packages/extension/static/manifest\.json$''', '''(^|/)packages/plugin/test/install\.test\.mjs$''']
