@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chromex"
+  short_description: "Safely control local Chromium tabs"
+  default_prompt: "Use $chromex to inspect and interact with my Chromium tab."

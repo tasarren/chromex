@@ -1,0 +1,92 @@
+name: ci
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+  workflow_call:
+    inputs:
+      export-candidate:
+        description: Upload the verified Node 24 tarball as the `candidate` artifact.
+        type: boolean
+        default: false
+    outputs:
+      candidate-sha256:
+        description: SHA-256 of the exported tarball, from the producing job.
+        value: ${{ jobs.verify.outputs.sha256 }}
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  verify:
+    name: verify (node24)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    outputs:
+      sha256: ${{ steps.export.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: ${{ !inputs.export-candidate }}
+        run: docker build --target artifact --output "type=local,dest=$OUT" .
+        env:
+          OUT: ${{ runner.temp }}/candidate
+      - run: docker compose run --rm -T --build verify
+      - id: export
+        if: ${{ inputs.export-candidate }}
+        run: |
+          docker build --target artifact --output "type=local,dest=$OUT" .
+          tarball=$(sed 's/^[0-9a-f]*  \.\///' "$OUT/SHA256SUMS")
+          LC_ALL=C TZ=UTC tar -tvzf "$OUT/$tarball" >"$OUT/inventory.txt"
+          printf 'source_sha=%s\nrun_id=%s\nrun_attempt=%s\nworkflow_ref=%s\n' \
+            "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKFLOW_REF" >"$OUT/identity.txt"
+          test "$(find "$OUT" -mindepth 1 -printf '%f %y\n' | LC_ALL=C sort | tr '\n' ' ')" = \
+            "SHA256SUMS f identity.txt f inventory.txt f $tarball f "
+          echo "sha256=$(cut -d' ' -f1 "$OUT/SHA256SUMS")" >>"$GITHUB_OUTPUT"
+        env:
+          OUT: ${{ runner.temp }}/candidate
+      - if: ${{ inputs.export-candidate }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: candidate
+          path: ${{ runner.temp }}/candidate/
+          if-no-files-found: error
+          retention-days: 7
+  privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: sh .github/scripts/scan-secrets.sh
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+  check:
+    if: always()
+    needs: [verify, privacy, dependency-review]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      # Every required job must succeed; dependency review may be skipped only outside pull requests.
+      - run: |
+          test "$VERIFY" = success
+          test "$PRIVACY" = success
+          if [ "$EVENT" = pull_request ]; then test "$REVIEW" = success; else test "$REVIEW" = skipped; fi
+        env:
+          EVENT: ${{ github.event_name }}
+          VERIFY: ${{ needs.verify.result }}
+          PRIVACY: ${{ needs.privacy.result }}
+          REVIEW: ${{ needs.dependency-review.result }}

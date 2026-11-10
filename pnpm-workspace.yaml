@@ -3,14 +3,32 @@ packages:
 
 allowBuilds:
   esbuild: true
+  "@modelcontextprotocol/inspector": false
+  unrs-resolver: false
+
+# Already selected and verified Chrome API types; keep newer pnpm's age policy for other versions.
+minimumReleaseAgeExclude:
+  - chrome-types@0.1.457
 
 catalogs:
   runtime:
-    "@modelcontextprotocol/sdk": 1.29.0
-    zod: 4.1.8
+    "@modelcontextprotocol/sdk": 1.32.1
+    zod: 4.6.7
   tooling:
-    "@biomejs/biome": 2.4.8
-    "@types/node": 26.0.0
-    esbuild: 0.28.1
-    tsx: 4.23.0
+    "@eslint/js": 10.0.1
+    "@modelcontextprotocol/inspector": 2.11.0
+    "@stylistic/eslint-plugin": 5.10.0
+    "@types/node": 24.19.2
+    chrome-types: 0.1.457
+    eslint: 10.13.0
+    eslint-import-resolver-typescript: 4.4.5
+    eslint-plugin-import-x: 4.17.1
+    globals: 17.13.0
+    jscpd: 5.4.1
+    tsdown: 0.23.1
     typescript: 6.0.3
+    typescript-eslint: 8.71.2
+    vite: 8.3.4
+    vitest: 5.1.0
+    "@vitest/browser-playwright": 5.1.0
+    playwright: 1.65.0

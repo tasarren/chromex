@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture scroll</title>
+  <style>
+    body { margin: 0; padding: 12px; font: 14px/1.4 system-ui, sans-serif; }
+    #inner { height: 120px; overflow: auto; border: 1px solid #666; }
+    #inner div { height: 600px; background: linear-gradient(#fff, #c9d6f2); }
+    #far { margin-top: 2200px; }
+  </style>
+</head>
+<body>
+  <h1>Fixture scroll</h1>
+  <p id="page-state">scrollY 0</p>
+  <p id="inner-state">inner 0</p>
+  <div id="inner"><div></div></div>
+  <button id="far" type="button">Far target</button>
+  <script type="module">
+    const pageState = document.getElementById("page-state")
+    const inner = document.getElementById("inner")
+    const innerState = document.getElementById("inner-state")
+    addEventListener("scroll", () => { pageState.textContent = `scrollY ${Math.round(scrollY)}` })
+    inner.addEventListener("scroll", () => { innerState.textContent = `inner ${Math.round(inner.scrollTop)}` })
+  </script>
+</body>
+</html>

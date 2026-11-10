@@ -1,0 +1,19 @@
+{
+  "absolute": false,
+  "exitCode": 1,
+  "format": ["typescript", "javascript", "bash", "vue"],
+  "gitignore": true,
+  "ignore": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/*.d.ts"
+  ],
+  "minLines": 4,
+  "minTokens": 70,
+  "path": ["packages"],
+  "reporters": ["ai"],
+  "ignoreCase": true,
+  "noTips": true,
+  "noColors": true,
+  "threshold": 0
+}

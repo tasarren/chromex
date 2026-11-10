@@ -1,0 +1,16 @@
+# Gitleaks 8.30.1 config for .github/scripts/scan-secrets.sh.
+title = "Chromex"
+
+[extend]
+useDefault = true
+
+# The extension manifest key is a public identity key that fixes the extension ID; it is not a
+# secret. Only this exact value, under the generic rule, in the manifest is allowed. A changed
+# key, another secret in this file, or this key elsewhere still fails the scan.
+[[allowlists]]
+description = "Chromex extension public key"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "secret"
+regexes = ['''^MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArALgXbDD1D94Pd\+21zaF\+xYPWt7AHII7dtkmvItuI5KyNzHRi7Sh\+a1yjrWWiBklxdCRpJOh1prl\+LP9BWMoPYBIcccRT86ADLxnNpVPSrHukhCba7dp2mBPJ4/HPkAiApouM0HffIal/pbR8abVAFmxtyvHCzDXSQSWf3jAUjoTjr7UQWxZfmJiZabkSzUqZw\+hN1itU/DV0O6nd4GMC/M3JmFAEusRuzmAUoeSpcUpVTzoGgA4DZ7CFQ1Gpzbz94mGzWZKRkur2OK5Ro8mj32PYOKb9ZorOUEqCP5mWdlA9AhuNOCEj/B6y\+tcLs9ayiY\+cxYh5EfA1AY/ZYRtGQIDAQAB$''']
+paths = ['''(^|/)packages/extension/static/manifest\.json$''']

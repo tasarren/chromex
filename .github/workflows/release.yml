@@ -1,0 +1,138 @@
+name: release
+# Stable GitHub Release (published) stages the verified tarball on npm and attaches it.
+# Manual dispatch on main: `verify` builds and exports the candidate only; `rehearse-stage` also
+# stages it (a real registry write). A bare tag push triggers nothing. See docs/release.md.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: verify (no registry write) or rehearse-stage (real npm stage)
+        type: choice
+        options: [verify, rehearse-stage]
+        default: verify
+        required: true
+permissions: {}
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.guard.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: guard
+        run: node packages/plugin/scripts/verify-release.mjs preflight >>"$GITHUB_OUTPUT"
+        env:
+          RELEASE_MODE: ${{ inputs.mode }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+  ci:
+    needs: preflight
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    with:
+      export-candidate: true
+  stage:
+    needs: [preflight, ci]
+    if: >-
+      github.event_name == 'release' ||
+      (inputs.mode == 'rehearse-stage' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: candidate
+          path: ${{ runner.temp }}/candidate
+      - id: candidate
+        run: node packages/plugin/scripts/verify-release.mjs candidate "$RUNNER_TEMP/candidate" >>"$GITHUB_OUTPUT"
+        env:
+          RELEASE_VERSION: ${{ needs.preflight.outputs.version }}
+          CANDIDATE_SHA256: ${{ needs.ci.outputs.candidate-sha256 }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - working-directory: ${{ runner.temp }}/candidate
+        run: |
+          npx --yes npm@11.21.0 stage publish "./$TARBALL" --access public --tag latest
+          printf 'Staged %s (sha256 %s) from %s; awaiting npm approval.\n' \
+            "$TARBALL" "$SHA256" "$GITHUB_SHA" >>"$GITHUB_STEP_SUMMARY"
+        env:
+          TARBALL: ${{ steps.candidate.outputs.tarball }}
+          SHA256: ${{ needs.ci.outputs.candidate-sha256 }}
+  attach:
+    needs: [preflight, ci, stage]
+    if: github.event_name == 'release' && needs.stage.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: candidate
+          path: ${{ runner.temp }}/candidate
+      - id: candidate
+        run: node packages/plugin/scripts/verify-release.mjs candidate "$RUNNER_TEMP/candidate" >>"$GITHUB_OUTPUT"
+        env:
+          RELEASE_VERSION: ${{ needs.preflight.outputs.version }}
+          CANDIDATE_SHA256: ${{ needs.ci.outputs.candidate-sha256 }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.0
+          package-manager-cache: false
+      # The store zip comes from the same verified tarball. The bundled extension keeps the manifest
+      # `key` for Managed mode; the package step removes it.
+      - working-directory: ${{ runner.temp }}/candidate
+        run: |
+          mkdir "$RUNNER_TEMP/payload"
+          tar -xzf "$TARBALL" -C "$RUNNER_TEMP/payload"
+          node "$GITHUB_WORKSPACE/packages/extension/scripts/package.ts" \
+            --source "$RUNNER_TEMP/payload/package/dist/chromex/dist/extension" \
+            --out "$RUNNER_TEMP/candidate"
+        env:
+          TARBALL: ${{ steps.candidate.outputs.tarball }}
+      # Existing assets must match the candidate bytes; upload only missing names. Never --clobber.
+      - working-directory: ${{ runner.temp }}/candidate
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' >"$RUNNER_TEMP/assets.txt"
+          mkdir "$RUNNER_TEMP/existing"
+          set --
+          for name in "$TARBALL" SHA256SUMS inventory.txt identity.txt "$STORE_ZIP" SHA256SUMS.txt; do
+            if grep -qxF "$name" "$RUNNER_TEMP/assets.txt"; then
+              gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir "$RUNNER_TEMP/existing"
+              cmp "$RUNNER_TEMP/existing/$name" "$name"
+            else
+              set -- "$@" "$name"
+            fi
+          done
+          if [ "$#" -gt 0 ]; then gh release upload "$TAG" "$@" --repo "$GITHUB_REPOSITORY"; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+          TARBALL: ${{ steps.candidate.outputs.tarball }}
+          STORE_ZIP: chromex-${{ needs.preflight.outputs.version }}-chromium.zip

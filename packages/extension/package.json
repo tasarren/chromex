@@ -1,16 +1,30 @@
 {
   "name": "@chromex/extension",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
+  "license": "MIT",
+  "author": "Tasarren",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tasarren/chromex.git",
+    "directory": "packages/extension"
+  },
+  "homepage": "https://github.com/tasarren/chromex#readme",
+  "bugs": {
+    "url": "https://github.com/tasarren/chromex/issues"
+  },
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "clean": "node scripts/clean.mjs",
-    "typecheck": "tsc --noEmit"
+    "build": "vite build",
+    "dev": "vite",
+    "package": "node scripts/package.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json"
   },
   "devDependencies": {
+    "@chromex/protocol": "workspace:*",
     "@types/node": "catalog:tooling",
-    "esbuild": "catalog:tooling",
-    "typescript": "catalog:tooling"
+    "chrome-types": "catalog:tooling",
+    "typescript": "catalog:tooling",
+    "vite": "catalog:tooling"
   }
 }

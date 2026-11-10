@@ -1,56 +1,87 @@
+<p align="center">
+  <img src="docs/assets/chromex-logo.svg" width="96" height="96" alt="Chromex logo: a browser window with a bridge arc">
+</p>
+
 # Chromex
 
-A readable TypeScript monorepo for local Chromium control from agents on Linux. Chromex defaults to shared
-Managed Chromium per project/profile. Agents can hand off live tabs; user-browser Observe access requires a per-tab popup grant.
-It contains only the new bridge implementation; the extracted Web Store extension is not imported or
-modified.
+**Let your coding agent use a real browser.** Chromex (short for Chromium Executor) connects Claude Code,
+Codex, OpenCode, Grok and Cursor to Chromium on your Linux machine.
 
-## Packages
+## What your agent can do
 
-- `packages/extension` — MV3 Chromium extension using `chrome.debugger` and native messaging.
-- `packages/mcp` — authenticated Unix-socket broker, native host, MCP server, and origin policy.
-- `packages/plugin` — Codex plugin metadata, browser skill, artifact assembly, and local installer.
+- Open any page, including your local dev server, and read it: text, screenshots, console and network.
+- Click, type, scroll and drag with a visible cursor, so you can watch what it is doing.
+- Work in its own Chromium window with its own profile, without taking over your desktop or your tabs.
+- Hand a live tab to another agent. The page stays exactly as it was.
+- Work in your own browser too, but only on tabs you switch on yourself.
 
-Dependency versions are centralized in the named `runtime` and `tooling` catalogs in
-`pnpm-workspace.yaml`.
-
-## Documentation and Skills
-
-- Start with [`docs/index.md`](docs/index.md) for architecture, installation, tools, protocol, security, development, and troubleshooting.
-- Use [`skills/chrome-browser`](skills/chrome-browser) for safe browser operation.
-- Use [`skills/chromex-development`](skills/chromex-development) for workspace maintenance and plugin updates.
-
-## Development
+## Install
 
 ```bash
-pnpm install
-pnpm verify
+npx @tasarren/chromex setup
 ```
 
-Build outputs:
+Setup asks whether to install for this project or for every project, finds your browsers and
+agents, and registers Chromex with each one. Then it prints what it did, step by step. Start a new
+agent session afterwards.
 
-- `packages/extension/dist` — extension build input for plugin assembly.
-- `packages/plugin/dist/chrome-browser-bridge` — personal Codex plugin artifact, including the extension used by Managed mode.
+> **Not published yet.** The npm package does not exist yet, so the command above does not work
+> today. Until the first release, [install from source](docs/installation.md#install). The steps are
+> the same.
 
-## Installation
+You need Linux with a graphical session, Node.js 24.11 or newer, and Chromium. The full list, every
+setup option, and what setup writes are in [Installation](docs/installation.md).
 
-After building, run `pnpm install:local`. The installer copies the assembled plugin to
-`~/plugins/chrome-browser-bridge`, preserves or creates a user-only bridge token, and registers the
-native-messaging host used by Observe mode. It also installs the Codex plugin and registers the same
-MCP runtime globally for installed Claude Code and OpenCode CLIs. Run the installer from the
-graphical Linux session Managed mode should use; it saves an owner-only, allowlisted display
-environment beside the runtime so every MCP client launches Chromium consistently.
+## Try it
 
-In an interactive desktop session the installer opens `chrome://extensions`. Enable Developer mode,
-choose **Load unpacked**, and select `~/plugins/chrome-browser-bridge/dist/extension`. Use
-`pnpm install:local -- --no-open` in CI or other headless sessions. Managed mode creates its own
-private bridge and loads the packaged extension automatically on the first browser operation, including `chrome_status` or `chrome_tabs`.
+Ask your agent:
 
-Managed browsers outlive MCP clients. To hand off, release the tab and pass `browserId` plus `tabId` to the next agent's `chrome_use_tab`. The next agent takes a fresh snapshot; the page stays live. Close Chromium to end its runtime. For Observe, enable **Allow agents on this tab** in the popup, then use `observe: true`.
+> Open http://localhost:3000, click through the sign-up form, and tell me what breaks.
 
-If the dedicated browser cannot start, `chrome_open` reports its exit status and a safe process-output
-tail. The read-only `chrome_process_output` tool provides cursor-paged access to the latest bounded
-stdout/stderr diagnostics without persisting browser logs.
+The first browser call starts Chromium for you. Ask it to take a screenshot, or to hand the tab to
+another agent, whenever you like.
 
-The extension ID is `enbcklgjkjddndpkedgfhoeagcbogfdb`. Loopback sites and `about:blank` are
-allowed automatically. Every other page is hidden until its exact origin is explicitly allowed.
+## Works with
+
+| Agents | Browsers |
+| --- | --- |
+| Claude Code, Codex, OpenCode, Grok, Cursor | Chromium for the agent's own window (Managed). Chromium, Chrome, Chrome Beta and Dev, Brave, Edge and Vivaldi for your own browser (Observe). |
+
+Linux only. Google Chrome cannot be the agent's own browser, because it blocks the extension Chromex
+loads there; use Chromium for that and any browser above for Observe.
+
+## Your own browser
+
+Agents never see your tabs until you say so. Load the Chromex extension once: open
+`chrome://extensions`, turn on Developer mode, choose **Load unpacked** and pick
+`~/plugins/chromex/dist/extension` (setup prints this folder). Then open a tab, click the Chromex icon
+and switch on **Allow agents on this tab**. Switch it off, or choose **Release all tabs**, to take
+access back. There is no Chrome Web Store listing yet; one may come later. Details are in
+[Installation](docs/installation.md#install-the-observe-extension).
+
+## Privacy
+
+Chromex runs on your machine and opens no network port, but what an agent reads from a page goes to
+that agent's client, which may send it to its model provider. Agents can open any address with the
+profile's logged-in sessions, so use a temporary profile for sites you do not trust. See
+[Security](docs/security.md).
+
+## Update and remove
+
+- Update: [Installation, Update](docs/installation.md#update).
+- Remove: there is no uninstall command yet; [Manual removal](docs/installation.md#manual-removal)
+  lists each item and how to check it is yours before you delete it.
+
+## Documentation
+
+- [Documentation index](docs/index.md)
+- [Installation](docs/installation.md): requirements, options, what setup writes, update, removal
+- [Browser tools](docs/browser-tools.md): every tool an agent can call
+- [Security](docs/security.md) and [Troubleshooting](docs/troubleshooting.md)
+- [How it works](docs/tech/processes.md): diagrams of the processes, a tool call, setup and releases
+- Skills for agents: [`skills/chromex`](skills/chromex), and [`skills/chromex-development`](skills/chromex-development) for work on this repository
+- [Contributing](CONTRIBUTING.md) and [Changelog](CHANGELOG.md)
+
+## License
+
+MIT. See [`LICENSE`](LICENSE). Report vulnerabilities as described in [`SECURITY.md`](SECURITY.md).

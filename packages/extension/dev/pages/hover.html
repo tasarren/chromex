@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture hover</title>
+  <style>
+    body { margin: 0; padding: 12px; font: 14px/1.4 system-ui, sans-serif; }
+    #hover-zone { border: 2px dashed #666; min-height: 160px; padding: 12px; margin-top: 20px; }
+    #hover-only { display: none; }
+    #hover-zone:hover #hover-only { display: block; }
+  </style>
+</head>
+<body>
+  <h1>Fixture hover</h1>
+  <p id="hover-state">hover none</p>
+  <div id="hover-zone" role="region" aria-label="Hover zone">
+    <p>Move the pointer here.</p>
+    <button id="hover-target" type="button">Hover target</button>
+    <p id="hover-only">Hover-only content</p>
+  </div>
+  <script type="module">
+    const zone = document.getElementById("hover-zone")
+    const state = document.getElementById("hover-state")
+    zone.addEventListener("pointerover", () => { state.textContent = "hover pointerover" })
+  </script>
+</body>
+</html>

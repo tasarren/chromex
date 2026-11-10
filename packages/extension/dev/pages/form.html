@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture form</title>
+</head>
+<body>
+  <h1>Fixture form</h1>
+  <form id="form">
+    <label for="name">Name</label>
+    <input id="name" name="name" autocomplete="off">
+    <label for="choice">Choice</label>
+    <select id="choice" name="choice">
+      <option value="alpha">Alpha</option>
+      <option value="beta">Beta</option>
+      <option value="gamma">Gamma</option>
+    </select>
+    <button id="submit" type="submit">Submit</button>
+  </form>
+  <output id="result">submitted none</output>
+  <script type="module">
+    const form = document.getElementById("form")
+    const result = document.getElementById("result")
+    form.addEventListener("submit", (event) => {
+      event.preventDefault()
+      const data = new FormData(form)
+      result.textContent = `submitted name=${data.get("name") ?? ""} choice=${data.get("choice") ?? ""} submit=${event.submitter?.id ?? "none"}`
+    })
+  </script>
+</body>
+</html>

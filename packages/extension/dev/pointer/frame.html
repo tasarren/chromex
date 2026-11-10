@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Card frame</title>
+  <style>
+    body { margin: 0; padding: 6px; font: 13px system-ui, sans-serif; display: flex; gap: 6px; }
+    #frame-target { flex: 1; border: 2px dashed #8a8a99; min-height: 70px; padding: 6px; }
+    #frame-target.over { border-color: #1f5fd1; background: #eef3ff; }
+    .card { align-self: flex-start; padding: 6px 10px; border: 1px solid #555; border-radius: 4px; background: #e6f4ff; cursor: grab; }
+  </style>
+</head>
+<body>
+  <span class="card" id="frame-card" role="button" tabindex="0" draggable="true" aria-label="Frame card delta">Frame card delta</span>
+  <div id="frame-target" role="region" aria-label="Frame card target">Frame target</div>
+  <script type="module">
+    // Reports raw drag observations to the parent with the generation and load it was opened for and its
+    // own document nonce; the parent decides what they mean. It never moves cards or creates events itself.
+    import { dragData, FRAME_CARD_ID, gestureToken, nonce, PAYLOAD_LIMIT } from "./model.mjs"
+    const query = new URLSearchParams(location.search)
+    const generation = Number(query.get("g"))
+    const load = query.get("l")
+    const doc = nonce()
+    const target = document.getElementById("frame-target")
+    const source = document.getElementById("frame-card")
+    const report = (type, detail = {}) => parent.postMessage({ type, generation, load, doc, ...detail }, "*")
+    let token = "none"
+    target.addEventListener("dragenter", (event) => { event.preventDefault(); target.classList.add("over") })
+    target.addEventListener("dragover", (event) => event.preventDefault())
+    target.addEventListener("dragleave", () => target.classList.remove("over"))
+    target.addEventListener("drop", (event) => {
+      event.preventDefault()
+      target.classList.remove("over")
+      report("drop", { raw: event.dataTransfer.getData("text/plain").slice(0, PAYLOAD_LIMIT + 1) })
+    })
+    source.addEventListener("dragstart", (event) => {
+      token = gestureToken(generation, "f", nonce())
+      event.dataTransfer.setData("text/plain", dragData(FRAME_CARD_ID, token))
+      event.dataTransfer.effectAllowed = "move"
+      report("dragstart", { token })
+    })
+    source.addEventListener("dragend", (event) => report("dragend", { token, dropEffect: event.dataTransfer.dropEffect }))
+    report("ready")
+  </script>
+</body>
+</html>
