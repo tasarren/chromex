@@ -247,11 +247,8 @@ config allows only the public extension key in its two known files. It downloads
 
 `.github/workflows/ci.yml` runs on pull requests, pushes to `main`, and `workflow_call`, with a
 read-only token and no persisted checkout credentials. Jobs: `verify` (the artifact build, then
-`docker compose run --rm -T --build verify`), `privacy` (`scan-secrets.sh`), and
-`dependency-review` (pull requests only; fails on high-severity advisories). The workflow defines an
-aggregate `check` job; it becomes required when the repository ruleset is applied. `check` fails
-unless `verify` and `privacy` succeed and `dependency-review` succeeds on pull
-requests (skipped otherwise). Only the release workflow asks `verify` to export a candidate; see
+`docker compose run --rm -T --build verify`) and `privacy` (`scan-secrets.sh`). The aggregate
+`check` job is the required status check; it fails unless `verify` and `privacy` succeed. Only the release workflow asks `verify` to export a candidate; see
 [Release](release.md). Lint the workflows with the pinned actionlint image:
 
 ```bash

@@ -49,7 +49,7 @@ skill, so read **Changed** before you upgrade a build from source.
 - Staged `Dockerfile` pipeline (`docker build --target artifact` for the tarball, `docker compose run
   verify` for the e2e and browser tests); pinned Gitleaks history/tree scan
   (`.github/scripts/scan-secrets.sh`); GitHub CI with
-  an aggregate `check` (required once the repository ruleset is applied), dependency review on pull requests, and grouped Dependabot updates.
+  an aggregate required `check` over `verify` and `privacy`.
 - Chromex logo and extension icons (16, 32, 48, 128 px); install-first README with update and
   manual removal steps; `CONTRIBUTING.md`.
 - `shared-browser-live.test.ts` accepts `CHROMEX_MCP_SERVER` to test an installed runtime.
