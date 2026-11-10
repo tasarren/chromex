@@ -2,7 +2,16 @@
   <img src="docs/assets/chromex-logo.svg" width="96" height="96" alt="Chromex logo: a browser window with a bridge arc">
 </p>
 
-# Chromex
+<h1 align="center">Chromex</h1>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@tasarren/chromex"><img src="https://img.shields.io/npm/v/@tasarren/chromex" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@tasarren/chromex"><img src="https://img.shields.io/npm/dm/@tasarren/chromex" alt="npm downloads per month"></a>
+  <a href="https://github.com/tasarren/chromex/actions/workflows/ci.yml"><img src="https://github.com/tasarren/chromex/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/@tasarren/chromex" alt="License: MIT"></a>
+  <img src="https://img.shields.io/node/v/@tasarren/chromex" alt="Supported Node.js versions">
+  <img src="https://img.shields.io/badge/platform-linux-informational" alt="Platform: Linux">
+</p>
 
 **Let your coding agent use a real browser.** Chromex (short for Chromium Executor) connects Claude Code,
 Codex, OpenCode, Grok and Cursor to Chromium on your Linux machine.
@@ -23,11 +32,8 @@ npx @tasarren/chromex setup
 
 Setup asks whether to install for this project or for every project, finds your browsers and
 agents, and registers Chromex with each one. Then it prints what it did, step by step. Start a new
-agent session afterwards.
-
-> **Not published yet.** The npm package does not exist yet, so the command above does not work
-> today. Until the first release, [install from source](docs/installation.md#install). The steps are
-> the same.
+agent session afterwards. To run from a checkout instead, see
+[install from source](docs/installation.md#install).
 
 You need Linux with a graphical session, Node.js 24.11 or newer, and Chromium. The full list, every
 setup option, and what setup writes are in [Installation](docs/installation.md).

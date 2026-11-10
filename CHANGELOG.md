@@ -7,7 +7,7 @@ fixes only. The extension–host protocol version is separate from the project v
 
 ## 0.1.3 - 2026-11-10
 
-This is the first release candidate for publication. It renames the install, config, native host and
+This is the first published release (`@tasarren/chromex` on npm). It renames the install, config, native host and
 skill, so read **Changed** before you upgrade a build from source.
 
 ### Added
