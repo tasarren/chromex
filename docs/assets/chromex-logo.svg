@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title desc">
+  <title id="title">Chromex logo</title>
+  <desc id="desc">A rounded browser window with a bridge arc that joins two connection points.</desc>
+  <rect x="8" y="16" width="112" height="96" rx="16" fill="#2563EB"/>
+  <rect x="8" y="16" width="112" height="24" rx="16" fill="#1D4ED8"/>
+  <rect x="8" y="32" width="112" height="8" fill="#1D4ED8"/>
+  <circle cx="24" cy="28" r="4" fill="#FFFFFF"/>
+  <circle cx="38" cy="28" r="4" fill="#FFFFFF" opacity="0.7"/>
+  <circle cx="52" cy="28" r="4" fill="#FFFFFF" opacity="0.4"/>
+  <path d="M32 92 C32 60 96 60 96 92" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <line x1="32" y1="92" x2="96" y2="92" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="48" y1="74" x2="48" y2="92" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="74" x2="80" y2="92" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="92" r="8" fill="#FFFFFF"/>
+  <circle cx="96" cy="92" r="8" fill="#FFFFFF"/>
+</svg>

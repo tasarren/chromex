@@ -1,0 +1,30 @@
+name: chromex
+
+services:
+  verify:
+    build:
+      context: .
+      target: verify
+    init: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    shm_size: 1gb
+    environment:
+      CHROMEX_HEADLESS: "1"
+  install:
+    build:
+      context: .
+      target: install
+    init: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+  agent:
+    build:
+      context: .
+      target: agent
+    init: true
+    shm_size: 1gb
+    volumes:
+      - ./build/agent:/app/reports

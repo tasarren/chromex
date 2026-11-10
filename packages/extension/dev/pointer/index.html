@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chromex pointer fixture</title>
+  <style>
+    :root { font: 14px/1.4 system-ui, sans-serif; color: #1b1b1f; background: #f6f6f8; }
+    body { margin: 0; padding: 12px; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    h2 { font-size: 15px; margin: 0 0 6px; }
+    main { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    section { background: #fff; border: 1px solid #c8c8d0; border-radius: 6px; padding: 10px; min-width: 0; }
+    output { display: block; font: 12px/1.4 ui-monospace, monospace; margin-top: 6px; overflow-wrap: anywhere; }
+    button { min-height: 32px; }
+    button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #1f5fd1; outline-offset: 2px; }
+    .zone { border: 2px dashed #8a8a99; border-radius: 4px; min-height: 64px; padding: 6px; margin: 6px 0; }
+    .zone.over { border-color: #1f5fd1; background: #eef3ff; }
+    #move-target { height: 96px; }
+    #wheel-area { height: 96px; overflow: auto; }
+    #wheel-area div { height: 400px; background: linear-gradient(#fff, #c9d6f2); }
+    canvas { border: 1px solid #8a8a99; touch-action: none; max-width: 100%; }
+    .card { display: inline-block; padding: 6px 10px; margin: 2px; border: 1px solid #555; border-radius: 4px; background: #fffbe6; cursor: grab; }
+    iframe { width: 100%; height: 120px; border: 1px solid #8a8a99; }
+    #geometry-boxes { display: flex; gap: 8px; }
+    #geometry-boxes div { width: 40px; height: 40px; }
+    #shifted { display: block; margin: 6px 0; }
+    #shifted.on { margin-top: 54px; }
+    #log { max-height: 220px; overflow: auto; margin: 0; padding-left: 20px; font: 12px/1.4 ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <h1>Chromex pointer fixture</h1>
+  <p>Development-only page. Each case shows its current state and resets to a known initial state.
+    Browser events show what the page observed; they do not identify who produced the input.</p>
+  <button type="button" id="reset-all">Reset all cases</button>
+  <output id="summary" aria-label="Summary"></output>
+
+  <main>
+    <section aria-labelledby="h-move">
+      <h2 id="h-move">Movement and buttons</h2>
+      <div class="zone" id="move-target" role="region" aria-label="Movement target">Move the pointer here.</div>
+      <button type="button" id="button-target">Button target</button>
+      <div class="zone" id="menu-page" role="region" aria-label="Page-handled context menu">Page-handled right-click menu</div>
+      <div class="zone" id="menu-native" role="region" aria-label="Native context menu">Native right-click menu</div>
+      <div id="wheel-area" role="region" aria-label="Wheel area" tabindex="0"><div></div></div>
+      <button type="button" data-reset="movement">Reset movement</button>
+      <output id="state-movement" aria-label="Movement state"></output>
+    </section>
+
+    <section aria-labelledby="h-slider">
+      <h2 id="h-slider">Slider</h2>
+      <label for="slider">Level</label>
+      <input type="range" id="slider" min="0" max="100" value="20">
+      <button type="button" data-reset="slider">Reset slider</button>
+      <output id="state-slider" aria-label="Slider state"></output>
+    </section>
+
+    <section aria-labelledby="h-canvas">
+      <h2 id="h-canvas">Canvas stroke</h2>
+      <canvas id="canvas" width="300" height="140" role="img" aria-label="Drawing canvas"></canvas>
+      <button type="button" data-reset="canvas">Reset canvas</button>
+      <output id="state-canvas" aria-label="Canvas state"></output>
+    </section>
+
+    <section aria-labelledby="h-selection">
+      <h2 id="h-selection">Text selection</h2>
+      <p id="selection-text">The quick brown fox jumps over the lazy dog near the quiet river bank.</p>
+      <button type="button" data-reset="selection">Reset selection</button>
+      <output id="state-selection" aria-label="Selection state"></output>
+    </section>
+
+    <section aria-labelledby="h-cards">
+      <h2 id="h-cards">Card transfer</h2>
+      <div id="card-source" role="group" aria-label="Card source">
+        <span class="card" role="button" tabindex="0" draggable="true" data-card="alpha">Card alpha</span>
+        <span class="card" role="button" tabindex="0" draggable="true" data-card="beta">Card beta</span>
+        <span class="card" role="button" tabindex="0" draggable="true" data-card="gamma">Card gamma</span>
+      </div>
+      <div class="zone" id="card-target" role="region" aria-label="Local card target">Local target</div>
+      <div class="zone" id="pending-target" role="region" aria-label="Pending drop target">Pending-drop target (accepts, then records)</div>
+      <div class="zone" id="parent-target" role="region" aria-label="Parent target for frame card">Parent target for the frame card</div>
+      <iframe id="card-frame" title="Cross-frame card target"></iframe>
+      <button type="button" id="frame-site">Use cross-site frame</button>
+      <button type="button" data-reset="cards">Reset cards</button>
+      <output id="state-cards" aria-label="Card state"></output>
+    </section>
+
+    <section aria-labelledby="h-files">
+      <h2 id="h-files">Inert file drop</h2>
+      <p>Counts drops and files only. Files are never read, named or opened.</p>
+      <div class="zone" id="file-target" role="region" aria-label="File drop target">Drop files here.</div>
+      <button type="button" data-reset="files">Reset files</button>
+      <output id="state-files" aria-label="File state"></output>
+    </section>
+
+    <section aria-labelledby="h-lifecycle">
+      <h2 id="h-lifecycle">Lifecycle and geometry</h2>
+      <div id="geometry-boxes" aria-hidden="true">
+        <div style="background:#d1342f"></div><div style="background:#2f9e44"></div><div style="background:#1f5fd1"></div>
+      </div>
+      <button type="button" id="layout-toggle">Toggle layout shift</button>
+      <button type="button" id="shifted">Shifted target</button>
+      <button type="button" id="replace-document">Replace document</button>
+      <button type="button" data-reset="lifecycle">Reset lifecycle</button>
+      <output id="state-lifecycle" aria-label="Lifecycle state"></output>
+      <output id="state-geometry" aria-label="Geometry state"></output>
+    </section>
+
+    <section aria-labelledby="h-log">
+      <h2 id="h-log">Event log (latest 40)</h2>
+      <ol id="log" aria-label="Event log"></ol>
+    </section>
+  </main>
+  <script type="module" src="pointer.mjs"></script>
+</body>
+</html>

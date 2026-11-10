@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture errors</title>
+</head>
+<body>
+  <h1>Fixture errors</h1>
+  <p id="network-state">network pending</p>
+  <script type="module">
+    const state = document.getElementById("network-state")
+    void Promise.allSettled([
+      fetch("/missing.png").then((response) => response.status),
+      fetch("/index.html").then((response) => response.status),
+    ]).then((results) => {
+      state.textContent = `network ${results.map((result) => result.status === "fulfilled" ? result.value : "failed").join(" ")}`
+    })
+    setTimeout(() => { throw new Error("fixture console error") }, 0)
+  </script>
+</body>
+</html>

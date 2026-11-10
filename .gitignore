@@ -1,6 +1,19 @@
 **/node_modules/
 **/dist/
+**/dist-store/
 coverage/
+.vitest/
+/build/
 *.log
+*.tgz
+.env
+.env.*
+.npmrc
+.idea/
+.vscode/
+# Local skill installs written by `chromex setup --scope project`
+/skills-lock.json
+/.claude/
 # CocoIndex Code (ccc)
 /.cocoindex_code/
+/.opencode/

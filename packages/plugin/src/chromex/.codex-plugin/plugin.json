@@ -1,0 +1,26 @@
+{
+  "name": "chromex",
+  "version": "0.1.3",
+  "description": "Control Chromium on Linux through a local native bridge, with managed browser profiles by default.",
+  "author": {
+    "name": "Tasarren"
+  },
+  "license": "MIT",
+  "keywords": ["browser", "chromium", "mcp", "linux"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Chromex",
+    "shortDescription": "Control a managed Chromium browser",
+    "longDescription": "A local Linux bridge that gives coding agents controlled access to a dedicated managed Chromium profile, with opt-in per-tab Observe access to your own browser.",
+    "developerName": "Tasarren",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Inspect the active Chromium tab.",
+      "Use Chromium to verify this web flow.",
+      "Open a tab and interact with the page."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

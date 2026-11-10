@@ -1,13 +1,54 @@
 {
-  "name": "@chromex/plugin",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@tasarren/chromex",
+  "version": "0.1.3",
+  "description": "Local Chromium control for coding agents on Linux through an MCP bridge",
+  "keywords": [
+    "chromium",
+    "mcp",
+    "browser-automation",
+    "coding-agents",
+    "codex"
+  ],
+  "license": "MIT",
+  "author": "Tasarren",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tasarren/chromex.git",
+    "directory": "packages/plugin"
+  },
+  "homepage": "https://github.com/tasarren/chromex#readme",
+  "bugs": {
+    "url": "https://github.com/tasarren/chromex/issues"
+  },
   "type": "module",
+  "bin": {
+    "chromex": "dist/cli.mjs"
+  },
+  "files": [
+    "dist/cli.mjs",
+    "dist/chromex"
+  ],
+  "os": [
+    "linux"
+  ],
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "clean": "node scripts/clean.mjs",
-    "install:local": "node scripts/install.mjs",
-    "test": "node --test test/*.test.mjs",
-    "typecheck": "node --check scripts/build.mjs && node --check scripts/install.mjs && node --check test/install.test.mjs"
+    "build": "tsdown",
+    "install:local": "node dist/cli.mjs setup",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@chromex/extension": "workspace:*",
+    "@chromex/mcp": "workspace:*",
+    "@chromex/protocol": "workspace:*",
+    "@modelcontextprotocol/sdk": "catalog:runtime",
+    "@types/node": "catalog:tooling",
+    "tsdown": "catalog:tooling",
+    "typescript": "catalog:tooling"
   }
 }

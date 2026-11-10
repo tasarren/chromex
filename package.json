@@ -1,24 +1,52 @@
 {
   "name": "chromex",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
+  "description": "Local Chromium control for coding agents on Linux through an MCP bridge",
+  "license": "MIT",
+  "author": "Tasarren",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tasarren/chromex.git"
+  },
+  "homepage": "https://github.com/tasarren/chromex#readme",
+  "bugs": {
+    "url": "https://github.com/tasarren/chromex/issues"
+  },
   "type": "module",
   "scripts": {
-    "build": "pnpm --filter @chromex/extension build && pnpm --filter @chromex/mcp build && pnpm --filter @chromex/plugin build",
-    "clean": "pnpm -r clean",
-    "install:local": "pnpm --filter @chromex/plugin install:local",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "test": "pnpm --filter @chromex/mcp --filter @chromex/plugin test",
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @chromex/extension dev",
+    "dev:pointer": "node packages/extension/dev/serve.ts",
+    "install:local": "pnpm --filter @tasarren/chromex install:local",
+    "inspect": "mcp-inspector node packages/plugin/dist/chromex/dist/mcp-server.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm check:code",
+    "check:code": "pnpm check:code:density && pnpm check:code:duplicity",
+    "check:code:density": "agent-loader codebase-audit report --dir packages --format=text --top 40",
+    "check:code:duplicity": "jscpd --fail-on-empty",
+    "lint": "eslint --max-warnings 0 .",
+    "lint:fix": "eslint --fix .",
+    "test": "vitest run",
     "typecheck": "pnpm -r typecheck",
-    "versions": "node scripts/check-versions.mjs",
-    "verify": "pnpm lint && pnpm versions && pnpm typecheck && pnpm test && pnpm build"
+    "verify": "pnpm lint && pnpm check:code:duplicity && pnpm typecheck && pnpm build && pnpm test"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:tooling"
+    "@eslint/js": "catalog:tooling",
+    "@modelcontextprotocol/inspector": "catalog:tooling",
+    "@stylistic/eslint-plugin": "catalog:tooling",
+    "@types/node": "catalog:tooling",
+    "eslint": "catalog:tooling",
+    "eslint-import-resolver-typescript": "catalog:tooling",
+    "eslint-plugin-import-x": "catalog:tooling",
+    "globals": "catalog:tooling",
+    "jscpd": "catalog:tooling",
+    "typescript": "catalog:tooling",
+    "typescript-eslint": "catalog:tooling",
+    "@vitest/browser-playwright": "catalog:tooling",
+    "playwright": "catalog:tooling",
+    "vitest": "catalog:tooling"
   },
   "engines": {
-    "node": ">=22"
-  },
-  "packageManager": "pnpm@10.33.0"
+    "node": ">=24.11.0"
+  }
 }

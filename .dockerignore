@@ -1,0 +1,37 @@
+# Only verification inputs enter the image. Hidden files, keys and credentials stay out, except the
+# duplicate-check config and the plugin metadata files the build needs.
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!eslint.config.mjs
+!tsconfig.base.json
+!vitest.config.ts
+!LICENSE
+!packages/*/package.json
+!packages/*/tsconfig.json
+!packages/extension/tsconfig.node.json
+!packages/*/tsdown.config.ts
+!packages/*/vite.config.ts
+!packages/extension/popup.html
+!packages/*/README.md
+!packages/*/src/**
+!packages/*/static/**
+!packages/*/dev/**
+!packages/*/test/**
+!packages/*/scripts/**
+!skills/chromex/**
+!skills/chromex-development/**
+!docker/**
+**/.*
+**/*.pem
+**/*.key
+**/credentials*
+**/node_modules
+**/dist
+**/*.log
+**/*.tgz
+!.jscpd.json
+!packages/plugin/src/chromex/.agents/plugins/marketplace.json
+!packages/plugin/src/chromex/.codex-plugin/plugin.json
+!packages/plugin/src/chromex/.mcp.json

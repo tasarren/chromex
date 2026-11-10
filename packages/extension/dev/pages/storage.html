@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture storage</title>
+</head>
+<body>
+  <h1>Fixture storage</h1>
+  <p id="value">stored none</p>
+  <script type="module">
+    const params = new URLSearchParams(location.search)
+    const set = params.get("set")
+    if (set !== null) localStorage.setItem("chromex-fixture", set)
+    const stored = localStorage.getItem("chromex-fixture")
+    document.getElementById("value").textContent = `stored ${stored ?? "none"}`
+  </script>
+</body>
+</html>

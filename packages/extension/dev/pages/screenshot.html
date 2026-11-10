@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fixture screenshot</title>
+  <style>
+    body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
+    #pixel-target {
+      position: absolute;
+      left: 30px;
+      top: 100px;
+      width: 100px;
+      height: 50px;
+      background: #d1342f;
+      color: #fff;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Screenshot fixture</h1>
+  <p id="click-state">click none</p>
+  <button id="pixel-target" type="button">Pixel target</button>
+  <script type="module">
+    document.getElementById("pixel-target").addEventListener("click", (event) => {
+      document.getElementById("click-state").textContent = `click ${Math.round(event.clientX)},${Math.round(event.clientY)}`
+    })
+  </script>
+</body>
+</html>
