@@ -6,7 +6,7 @@ allowBuilds:
 
 catalogs:
   runtime:
-    "@modelcontextprotocol/sdk": 1.29.0
+    "@modelcontextprotocol/sdk": 1.32.0
     zod: 4.1.8
   tooling:
     "@biomejs/biome": 2.4.8

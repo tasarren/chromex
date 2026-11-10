@@ -7,8 +7,8 @@ settings:
 catalogs:
   runtime:
     '@modelcontextprotocol/sdk':
-      specifier: 1.29.0
-      version: 1.29.0
+      specifier: 1.32.0
+      version: 1.32.0
     zod:
       specifier: 4.1.8
       version: 4.1.8
@@ -53,7 +53,7 @@ importers:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: catalog:runtime
-        version: 1.29.0(zod@4.1.8)
+        version: 1.32.0(zod@4.1.8)
       zod:
         specifier: catalog:runtime
         version: 4.1.8
@@ -294,8 +294,8 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@modelcontextprotocol/sdk@1.29.0':
-    resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
+  '@modelcontextprotocol/sdk@1.32.0':
+    resolution: {integrity: sha512-8BviX/hK4Gd2eL1KdTwm0gfl4d3wdoErW0Jd00h6nomUAtk6IJk5vwQJc6kfWtJTzN5OEV/lgIiJKI8fiDGAlA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
@@ -803,7 +803,7 @@ snapshots:
     dependencies:
       hono: 4.12.32
 
-  '@modelcontextprotocol/sdk@1.29.0(zod@4.1.8)':
+  '@modelcontextprotocol/sdk@1.32.0(zod@4.1.8)':
     dependencies:
       '@hono/node-server': 1.19.15(hono@4.12.32)
       ajv: 8.20.0
