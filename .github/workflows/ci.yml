@@ -19,8 +19,35 @@ concurrency:
   group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # Only a pull request touching nothing but docs skips verify; every other event verifies.
+      - id: diff
+        run: |
+          code=true
+          if [ "$EVENT" = pull_request ]; then
+            files=$(git diff --name-only "origin/$BASE...HEAD")
+            if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '\.md$|^docs/|^\.github/ISSUE_TEMPLATE/'; then
+              code=false
+            fi
+          fi
+          echo "code=$code" >>"$GITHUB_OUTPUT"
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
   verify:
     name: verify (node24)
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     outputs:
@@ -65,14 +92,17 @@ jobs:
       - run: sh .github/scripts/scan-secrets.sh
   check:
     if: always()
-    needs: [verify, privacy]
+    needs: [changes, verify, privacy]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      # Every required job must succeed.
+      # Every required job must succeed; verify may skip only on a docs-only pull request.
       - run: |
-          test "$VERIFY" = success
+          test "$CHANGES" = success
           test "$PRIVACY" = success
+          test "$VERIFY" = success || { test "$VERIFY" = skipped && test "$CODE" = false; }
         env:
+          CHANGES: ${{ needs.changes.result }}
+          CODE: ${{ needs.changes.outputs.code }}
           VERIFY: ${{ needs.verify.result }}
           PRIVACY: ${{ needs.privacy.result }}
