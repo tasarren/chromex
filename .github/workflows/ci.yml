@@ -25,25 +25,30 @@ jobs:
     outputs:
       code: ${{ steps.diff.outputs.code }}
     steps:
-      - if: ${{ github.event_name == 'pull_request' }}
+      - if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      # Only a pull request touching nothing but docs skips verify; every other event verifies.
+      # A pull request or push to main that touches nothing but docs skips verify.
+      # Release calls this workflow on release and workflow_dispatch; those events still verify.
       - id: diff
         run: |
           code=true
+          files=
           if [ "$EVENT" = pull_request ]; then
             files=$(git diff --name-only "origin/$BASE...HEAD")
-            if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '\.md$|^docs/|^\.github/ISSUE_TEMPLATE/'; then
-              code=false
-            fi
+          elif [ "$EVENT" = push ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+          fi
+          if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '\.md$|^docs/|^\.github/ISSUE_TEMPLATE/|^\.github/FUNDING\.yml$|^LICENSE$'; then
+            code=false
           fi
           echo "code=$code" >>"$GITHUB_OUTPUT"
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
   verify:
     name: verify (node24)
     needs: changes
@@ -96,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      # Every required job must succeed; verify may skip only on a docs-only pull request.
+      # Every required job must succeed; verify may skip only on a docs-only pull request or push.
       - run: |
           test "$CHANGES" = success
           test "$PRIVACY" = success
