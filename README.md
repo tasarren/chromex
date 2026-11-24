@@ -11,6 +11,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/npm/l/@tasarren/chromex" alt="License: MIT"></a>
   <img src="https://img.shields.io/node/v/@tasarren/chromex" alt="Supported Node.js versions">
   <img src="https://img.shields.io/badge/platform-linux-informational" alt="Platform: Linux">
+  <a href="https://ko-fi.com/tasarren"><img src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
 </p>
 
 **Let your coding agent use a real browser.** Chromex (short for Chromium Executor) connects Claude Code,
@@ -91,3 +92,7 @@ profile's logged-in sessions, so use a temporary profile for sites you do not tr
 ## License
 
 MIT. See [`LICENSE`](LICENSE). Report vulnerabilities as described in [`SECURITY.md`](SECURITY.md).
+
+## Support
+
+Tip on [Ko-fi](https://ko-fi.com/tasarren) or sponsor [@tasarren on GitHub](https://github.com/sponsors/tasarren). Both help keep this project moving.
